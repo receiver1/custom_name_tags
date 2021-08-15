@@ -128,12 +128,7 @@ void hook::timer_update()
 
                     std::printf("%d: %d %p\n", i, remote->data->show_name_tag, remote);
 
-                    if (remote->data->show_name_tag == 1) {
-                        remote->data->show_name_tag = 0;
-                    }
-                    else {
-                        remote->data->show_name_tag = 1;
-                    }
+                    remote->data->hide_name_tag ^= true;
                 });
 #endif
 
