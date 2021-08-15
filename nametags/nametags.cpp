@@ -26,16 +26,16 @@ c_name_tags::c_name_tags(std::uint32_t playerid, CD3DRender *render, CD3DFont *f
 void c_name_tags::draw_bars()
 {
     // Health
-    g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi,
-        screen_position.y + text_height + 4.0f, 100.0f / 2.0f * g_options.width_multi, 6.0f, 0xFF000000, 0xFF000000);
+    g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y + 
+        text_height + 4.0f, 100.0f / 2.0f * g_options.width_multi, 6.0f, 0xFF000000, g_options.health_back_color);
     g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y +
         text_height + 4.0f, remote->data->actor_health / 2.0f * g_options.width_multi, 6.0f, 0xFF00000, g_options.health_color);
 
     // Armor
     if (remote->data->actor_armor > 0.0f)
     {
-        g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi,
-            screen_position.y + text_height + 12.0f, 100.0f / 2.0f * g_options.width_multi, 6.0f, 0xFF000000, 0xFF000000);
+        g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y + 
+            text_height + 12.0f, 100.0f / 2.0f * g_options.width_multi, 6.0f, 0xFF000000, g_options.armor_back_color);
         g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y +
             text_height + 12.0f, remote->data->actor_armor / 2.0f * g_options.width_multi, 6.0f, 0xFF000000, g_options.armor_color);
     }

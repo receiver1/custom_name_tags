@@ -9,6 +9,8 @@ struct s_options
 	bool afk_text {true};
 	std::uint32_t health_color {0xFFFF0000};
 	std::uint32_t armor_color {0xFFFFFFFF};
+	std::uint32_t health_back_color {0xFF000000};
+	std::uint32_t armor_back_color {0xFF000000};
 	std::string font_face {"Arial"};
 	int font_size {10};
 	std::uint32_t font_flags {FCR_BOLD | FCR_SHADOW};
@@ -39,8 +41,14 @@ struct s_options
 					if (!type.compare("health_color")) {
 						health_color = static_cast<std::uint32_t>(std::stoul(value, nullptr, 16));
 					}
+					if(!type.compare("health_back_color")) {
+						health_back_color = static_cast<std::uint32_t>(std::stoul(value, nullptr, 16));
+					}
 					if (!type.compare("armor_color")) {
 						armor_color = static_cast<std::uint32_t>(std::stoul(value, nullptr, 16));
+					}
+					if (!type.compare("armor_back_color")) {
+						armor_back_color = static_cast<std::uint32_t>(std::stoul(value, nullptr, 16));
 					}
 					if (!type.compare("font_face")) {
 						font_face = value;
@@ -81,7 +89,9 @@ struct s_options
 				file << "enable " << enable << std::endl;
 				file << "afk_text " << afk_text << std::endl;
 				file << "health_color " << std::hex << std::uppercase << health_color << std::dec << std::nouppercase << std::endl;
+				file << "health_back_color " << std::hex << std::uppercase << health_back_color << std::dec << std::nouppercase << std::endl;
 				file << "armor_color " << std::hex << std::uppercase << armor_color << std::dec << std::nouppercase << std::endl;
+				file << "armor_back_color " << std::hex << std::uppercase << armor_back_color << std::dec << std::nouppercase << std::endl;
 				file << "font_face " << font_face << std::endl;
 				file << "font_size " << font_size << std::endl;
 				file << "font_flags " << font_flags << std::endl;
