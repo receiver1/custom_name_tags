@@ -16,6 +16,7 @@ struct s_options
 	std::uint32_t font_flags {FCR_BOLD | FCR_SHADOW};
 	float z_multi {1.0f}; // Height of text above player head
 	float width_multi {1.0f}; // Multiplier width of bars
+	float height_multi {1.0f}; // Multiplier height of bars
 	bool white_id {true};
 
 	void load(bool first_load = false)
@@ -65,6 +66,9 @@ struct s_options
 					if (!type.compare("width_multi")) {
 						width_multi = std::stof(value);
 					}
+					if (!type.compare("height_multi")) {
+						height_multi = std::stof(value);
+					}
 					if (!type.compare("white_id")) {
 						white_id = static_cast<bool>(std::stoi(value));
 					}
@@ -97,6 +101,7 @@ struct s_options
 				file << "font_flags " << font_flags << std::endl;
 				file << "z_multi " << z_multi << std::endl;
 				file << "width_multi " << width_multi << std::endl;
+				file << "height_multi " << height_multi << std::endl;
 				file << "white_id " << white_id << std::endl;
 
 				file.close();

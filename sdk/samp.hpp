@@ -40,9 +40,9 @@ struct s_samp_ped
 struct s_remote_player_data
 {
 	s_samp_ped *samp_ped;
-	char padding_01[0x7];
-	bool hide_name_tag; // 0xB
-	char padding_02[0x1AC];
+	char padding_01[0xAF];
+	bool show_name_tag; // 0xB3
+	char padding_02[0x104];
 	float actor_armor; // 0x1B8
 	float actor_health;
 	char padding_03[0x11];

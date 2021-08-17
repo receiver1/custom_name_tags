@@ -25,19 +25,21 @@ c_name_tags::c_name_tags(std::uint32_t playerid, CD3DRender *render, CD3DFont *f
 
 void c_name_tags::draw_bars()
 {
+    float health {std::min(remote->data->actor_health, 100.0f)};
+
     // Health
-    g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y + 
-        text_height + 4.0f, 100.0f / 2.0f * g_options.width_multi, 6.0f, 0xFF000000, g_options.health_back_color);
-    g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y +
-        text_height + 4.0f, remote->data->actor_health / 2.0f * g_options.width_multi, 6.0f, 0xFF00000, g_options.health_color);
+    g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y + text_height + 
+        4.0f, 100.0f / 2.0f * g_options.width_multi, 6.0f * g_options.height_multi, 0xFF000000, g_options.health_back_color);
+    g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y + text_height + 
+        4.0f, health / 2.0f * g_options.width_multi, 6.0f * g_options.height_multi, 0xFF000000, g_options.health_color);
 
     // Armor
     if (remote->data->actor_armor > 0.0f)
     {
-        g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y + 
-            text_height + 12.0f, 100.0f / 2.0f * g_options.width_multi, 6.0f, 0xFF000000, g_options.armor_back_color);
-        g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y +
-            text_height + 12.0f, remote->data->actor_armor / 2.0f * g_options.width_multi, 6.0f, 0xFF000000, g_options.armor_color);
+        g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y + text_height + 6.0f + 6.0f * 
+            g_options.height_multi, 100.0f / 2.0f * g_options.width_multi, 6.0f * g_options.height_multi, 0xFF000000, g_options.armor_back_color);
+        g_render->D3DBoxBorder(screen_position.x - 24.0f * g_options.width_multi, screen_position.y + text_height + 6.0f + 6.0f * 
+            g_options.height_multi, remote->data->actor_armor / 2.0f * g_options.width_multi, 6.0f * g_options.height_multi, 0xFF000000, g_options.armor_color);
     }
 }
 
@@ -81,7 +83,7 @@ bool c_name_tags::is_valid(float server_distance)
     }
 
     remote = g_samp.get_info()->pools->players->remote[playerid];
-    if (remote->data->hide_name_tag) {
+    if (!remote->data->show_name_tag) {
         return false;
     }
 

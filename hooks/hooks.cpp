@@ -7,7 +7,7 @@ CD3DFont *g_font {nullptr};
 bool is_render_ready {false};
 bool is_timer_initializated {false};
 
-c_call tags_call, bars_call;
+c_call tags_call, bars_call, bubble_call;
 
 HRESULT __stdcall hook::device_reset(IDirect3DDevice9 *device, D3DPRESENT_PARAMETERS *present_params)
 {
@@ -73,6 +73,14 @@ void hook::bars_draw()
     reinterpret_cast<prototype::void_t>(bars_call.original())();
 }
 
+void hook::bubbles_draw()
+{
+    if (g_options.enable) {
+        return;
+    }
+    reinterpret_cast<prototype::void_t>(bubble_call.original())();
+}
+
 void hook::timer_update()
 {
     if (!is_timer_initializated)
@@ -96,7 +104,9 @@ void hook::timer_update()
 
                 tags_call.install(g_samp.get_address(0x71195U), &hook::tags_draw);
                 bars_call.install(g_samp.get_address(0x71190U), &hook::bars_draw);
-                //bubble_call.install(g_samp.get_address(0x71458U), &bubble_hooked);
+#if defined(_DEBUG_MODE)
+                bubble_call.install(g_samp.get_address(0x71458U), &hook::bubbles_draw);
+#endif
                 //bubble_add_call.install(g_samp.get_address(0xCB76U), &bubble_add_hooked);
 
                 g_samp.register_chat_command("customtags", [](const char *args)
@@ -125,15 +135,11 @@ void hook::timer_update()
                     }
 
                     auto remote {g_samp.get_info()->pools->players->remote[i]};
+                    auto &shit {*(uint8_t *)((uintptr_t)remote->data + 0xB3)};
 
-                    std::printf("%d: %d %p\n", i, remote->data->show_name_tag, remote);
+                    std::printf("%d: %d %p\n", i, shit, remote);
 
-                    if (remote->data->show_name_tag == 1) {
-                        remote->data->show_name_tag = 0;
-                    }
-                    else {
-                        remote->data->show_name_tag = 1;
-                    }
+                    shit ^= true;
                 });
 #endif
 

@@ -1,6 +1,4 @@
 
-#define _CRT_SECURE_NO_WARNINGS
-
 #include "main.h"
 
 c_entry::c_entry()
