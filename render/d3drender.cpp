@@ -25,16 +25,16 @@
 // http://www.game-deception.com   http://forum.game-deception.com
 // irc://irc.rizon.net/game-deception
 //
-// A lot all of the CD3DFont::Initialize() code was created by Microsoft
+// A lot all of the c_font::Initialize() code was created by Microsoft
 // (taken from the D3D9 SDK)
 //
 // Please note that this is NOT 100% complete yet, colour tags and
 // shadows are not implemented yet
 //
 // USAGE:
-//   CD3DFont:
+//   c_font:
 //     1) Instanciate the class with the parameterized constructor
-//        eg CD3DFont *g_pD3Dfont = new CD3DFont("Arial", 16, FCT_BOLD);
+//        eg c_font *g_pD3Dfont = new c_font("Arial", 16, FCT_BOLD);
 //
 //     2) Call Initialize() after other rendering is ready
 //        eg g_pD3DFont->Initialize(pD3Ddevice);
@@ -44,9 +44,9 @@
 //
 //     4) call Invalidate() upon Reset of the D3D surface and re-initialize
 //
-//   CD3DRender:
+//   c_render:
 //     1) Instanciate the class with the parameterized constructor
-//        eg CD3DRender *g_pRender = new CD3DRender(128);
+//        eg c_render *g_pRender = new c_render(128);
 //
 //     2) Call Initialize() after other rendering is ready
 //        eg g_pRender->Initialize(pD3Ddevice);
@@ -65,26 +65,26 @@
 //     4) call Invalidate() upon Reset of the D3D surface and re-initialize
 //
 // FASTER RENDERING (Advanced but NOT REQUIRED):
-//   To enable faster rendering, it's ideal to call static function CD3DBaseRendering::BeginRender(); before
-//   other font / primitive rendering code, and call CD3DBaseRendering::EndRender(); afterwards
-//   *** IT IS CRUCIAL THAT YOU CALL EndRender FOR EVERY BeginRender() CALL ***
+//   To enable faster rendering, it's ideal to call static function c_base_rendering::begin_render(); before
+//   other font / primitive rendering code, and call c_base_rendering::end_render(); afterwards
+//   *** IT IS CRUCIAL THAT YOU CALL end_render FOR EVERY begin_render() CALL ***
 //   *** IMAGE RENDERING MAY BECOME CORRUPT IF YOU DO NOT ***
 //   eg
-//     if( SUCCEEDED(CD3DBaseRender::BeginRender()) )
+//     if( SUCCEEDED(c_base_render::begin_render()) )
 //     {
 //         //primitive and font rendering goes here
-//         CD3DBaseRender::EndRender();
+//         c_base_render::end_render();
 //     }
 //
 
 #include "d3drender.h"
 
-IDirect3DDevice9 *CD3DBaseRender::m_pD3Ddev = NULL;
-IDirect3DStateBlock9 *CD3DBaseRender::m_pD3DstateDraw = NULL;
-IDirect3DStateBlock9 *CD3DBaseRender::m_pD3DstateNorm = NULL;
-int CD3DBaseRender::m_renderCount = 0;
-int CD3DBaseRender::m_numShared = 0;
-bool CD3DBaseRender::m_statesOK = false;
+IDirect3DDevice9 *c_base_render::m_pD3Ddev = NULL;
+IDirect3DStateBlock9 *c_base_render::m_pD3DstateDraw = NULL;
+IDirect3DStateBlock9 *c_base_render::m_pD3DstateNorm = NULL;
+int c_base_render::m_renderCount = 0;
+int c_base_render::m_numShared = 0;
+bool c_base_render::m_statesOK = false;
 
 inline d3dvertex_s Init2DVertex(float x, float y, DWORD color, float tu, float tv)
 {
@@ -92,18 +92,18 @@ inline d3dvertex_s Init2DVertex(float x, float y, DWORD color, float tu, float t
 	return v;
 }
 
-CD3DBaseRender::CD3DBaseRender()
+c_base_render::c_base_render()
 {
 	m_numShared++;
 }
 
-CD3DBaseRender::~CD3DBaseRender()
+c_base_render::~c_base_render()
 {
 	if (--m_numShared == 0)
 		DeleteStates();
 }
 
-HRESULT CD3DBaseRender::Initialize(IDirect3DDevice9 *pD3Ddev)
+HRESULT c_base_render::Initialize(IDirect3DDevice9 *pD3Ddev)
 {
 	if (m_pD3Ddev == NULL && (m_pD3Ddev = pD3Ddev) == NULL)
 		return E_FAIL;
@@ -114,13 +114,13 @@ HRESULT CD3DBaseRender::Initialize(IDirect3DDevice9 *pD3Ddev)
 	return S_OK;
 }
 
-HRESULT CD3DBaseRender::Invalidate()
+HRESULT c_base_render::Invalidate()
 {
 	DeleteStates();
 	return S_OK;
 }
 
-HRESULT CD3DBaseRender::BeginRender()
+HRESULT c_base_render::begin_render()
 {
 	if (!m_statesOK)
 		return E_FAIL;
@@ -134,7 +134,7 @@ HRESULT CD3DBaseRender::BeginRender()
 	return S_OK;
 }
 
-HRESULT CD3DBaseRender::EndRender()
+HRESULT c_base_render::end_render()
 {
 	if (!m_statesOK)
 		return E_FAIL;
@@ -149,7 +149,7 @@ HRESULT CD3DBaseRender::EndRender()
 	return S_OK;
 }
 
-HRESULT CD3DBaseRender::CreateStates()
+HRESULT c_base_render::CreateStates()
 {
 	for (int iStateBlock = 0; iStateBlock < 2; iStateBlock++)
 	{
@@ -201,7 +201,7 @@ HRESULT CD3DBaseRender::CreateStates()
 	return S_OK;
 }
 
-HRESULT CD3DBaseRender::DeleteStates()
+HRESULT c_base_render::DeleteStates()
 {
 	SAFE_RELEASE(m_pD3DstateDraw);
 	SAFE_RELEASE(m_pD3DstateNorm);
@@ -210,7 +210,7 @@ HRESULT CD3DBaseRender::DeleteStates()
 	return S_OK;
 }
 
-CD3DFont::CD3DFont(const char *szFontName, int fontHeight, DWORD dwCreateFlags)
+c_font::c_font(const char *szFontName, int fontHeight, DWORD dwCreateFlags)
 {
 	strncpy_s(m_szFontName, (szFontName ? szFontName : "Arial"), sizeof(m_szFontName));
 
@@ -234,38 +234,42 @@ CD3DFont::CD3DFont(const char *szFontName, int fontHeight, DWORD dwCreateFlags)
 	m_fChrHeight = 0.0;
 }
 
-CD3DFont::~CD3DFont()
+c_font::~c_font()
 {
 	Invalidate();
 }
 
 /* god, what a mess */
-HRESULT CD3DFont::Initialize(IDirect3DDevice9 *pD3Ddev)
+HRESULT c_font::initialize(IDirect3DDevice9 *pD3Ddev)
 {
-	if (FAILED(CD3DBaseRender::Initialize(pD3Ddev)))
+	if (FAILED(c_base_render::Initialize(pD3Ddev))) {
 		return E_FAIL;
+	}
 
-	if (m_pRender == NULL && (m_pRender = new CD3DRender(16)) == NULL)
+	if (m_pRender == NULL && (m_pRender = new c_render(16)) == NULL) {
 		return E_FAIL;
+	}
 
-	if (FAILED(m_pRender->Initialize(pD3Ddev)))
+	if (FAILED(m_pRender->Initialize(pD3Ddev))) {
 		return E_FAIL;
+	}
 
-	m_texWidth = m_texHeight = 1024;
+	m_texWidth = m_texHeight = m_fontHeight * 48;
 
-	if (FAILED(m_pD3Ddev->CreateTexture(m_texWidth, m_texHeight, 1, 0, D3DFMT_A4R4G4B4, D3DPOOL_MANAGED, &m_pD3Dtex,
-		NULL)))
+	if (FAILED(m_pD3Ddev->CreateTexture(m_texWidth, m_texHeight, 
+		1, 0, D3DFMT_A4R4G4B4, D3DPOOL_MANAGED, &m_pD3Dtex, NULL))) {
 		return E_FAIL;
+	}
 
-	if (FAILED(m_pD3Ddev->CreateVertexBuffer(m_maxTriangles * 3 * sizeof(d3dvertex_s),
-		D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, 0, D3DPOOL_DEFAULT, &m_pD3Dbuf, NULL)))
+	if (FAILED(m_pD3Ddev->CreateVertexBuffer(m_maxTriangles * 3 * sizeof(d3dvertex_s), D3DUSAGE_WRITEONLY, 0,
+		D3DPOOL_MANAGED, &m_pD3Dbuf, NULL))) 
 	{
 		SAFE_RELEASE(m_pD3Dtex);
 		return E_FAIL;
 	}
 
 	DWORD *pBitmapBits;
-	BITMAPINFO	bmi;
+	BITMAPINFO bmi;
 
 	memset(&bmi.bmiHeader, 0, sizeof(BITMAPINFOHEADER));
 	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -275,17 +279,17 @@ HRESULT CD3DFont::Initialize(IDirect3DDevice9 *pD3Ddev)
 	bmi.bmiHeader.biCompression = BI_RGB;
 	bmi.bmiHeader.biBitCount = 32;
 
-	HDC		hDC = CreateCompatibleDC(NULL);
+	HDC	hDC = CreateCompatibleDC(NULL);
 	HBITMAP hbmBitmap = CreateDIBSection(hDC, &bmi, DIB_RGB_COLORS, (void **)&pBitmapBits, NULL, 0);
 	SetMapMode(hDC, MM_TEXT);
 
-	int		iHeight = -m_fontHeight * (int)GetDeviceCaps(hDC, LOGPIXELSY) / 72;
+	int iHeight = -m_fontHeight * (int)GetDeviceCaps(hDC, LOGPIXELSY) / 72;
 
-	HFONT	hFont = CreateFont(iHeight, 0, 0, 0, (m_dwCreateFlags & FCR_BOLD) ? FW_BOLD : FW_NORMAL,
+	HFONT hFont = CreateFont(iHeight, 0, 0, 0, (m_dwCreateFlags & FCR_BOLD) ? FW_BOLD : FW_NORMAL,
 		m_dwCreateFlags & FCR_ITALICS, false, false, DEFAULT_CHARSET, OUT_TT_PRECIS,
 		CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, m_szFontName);
 
-	if (hFont == NULL)
+	if (hFont == NULL) 
 	{
 		DeleteObject(hbmBitmap);
 		DeleteDC(hDC);
@@ -297,23 +301,23 @@ HRESULT CD3DFont::Initialize(IDirect3DDevice9 *pD3Ddev)
 	SelectObject(hDC, hbmBitmap);
 	SelectObject(hDC, hFont);
 
-	RECT	all = {0, 0, m_texWidth - 1, m_texWidth - 1};
-	HBRUSH	green = CreateSolidBrush(RGB(0, 255, 0));
+	RECT   all = {0, 0, m_texWidth - 1, m_texWidth - 1};
+	HBRUSH green = CreateSolidBrush(RGB(0, 255, 0));
 	FillRect(hDC, &all, green);
 	DeleteObject(green);
 
 	SetBkMode(hDC, TRANSPARENT);
 	SetTextAlign(hDC, TA_TOP);
 
-	SIZE	size;
-	char	ch = ' ';
+	SIZE size;
+	char ch = ' ';
 
 	GetTextExtentPoint32(hDC, &ch, 1, &size);
 
 	m_chrSpacing = (size.cx + 3) / 4;
 	m_fChrHeight = (float)(size.cy);
 
-	if (m_dwCreateFlags & FCR_BORDER)
+	if (m_dwCreateFlags & FCR_BORDER) 
 	{
 		size.cx += 2;
 		size.cy += 2;
@@ -321,29 +325,29 @@ HRESULT CD3DFont::Initialize(IDirect3DDevice9 *pD3Ddev)
 
 	int y = 0, x = (size.cx + 3) / 4;
 
-	for (int c = 32; c < 256; c++)
+	for (int c = 32; c < 256; c++) 
 	{
 		ch = (char)c;
 
 		GetTextExtentPoint32(hDC, &ch, 1, &size);
-		if (m_dwCreateFlags & FCR_BORDER)
+		if (m_dwCreateFlags & FCR_BORDER) 
 		{
 			size.cx += 3;
 			size.cy += 3;
 		}
 
-		if (x + size.cx + m_chrSpacing > m_texWidth)
+		if (x + size.cx + m_chrSpacing > m_texWidth) 
 		{
 			x = m_chrSpacing;
-			if (y + size.cy * 2 + 2 < m_texHeight)
+			if (y + size.cy * 2 + 2 < m_texHeight) {
 				y += size.cy + 1;
+			}
 		}
 
-		RECT	rect = {x, y, x + size.cx, y + size.cy};
+		RECT rect = {x, y, x + size.cx, y + size.cy};
 
-		if (m_dwCreateFlags & FCR_BORDER)
+		if (m_dwCreateFlags & FCR_BORDER) 
 		{
-			// XXX retarded :p use font outline instead
 			SetTextColor(hDC, RGB(0, 0, 0));
 			x++;
 			y++;
@@ -360,7 +364,7 @@ HRESULT CD3DFont::Initialize(IDirect3DDevice9 *pD3Ddev)
 			x--;
 			y--;
 		}
-		else
+		else 
 		{
 			SetTextColor(hDC, RGB(255, 0, 0));
 			ExtTextOut(hDC, x, y, ETO_CLIPPED, &rect, &ch, 1, NULL);
@@ -377,21 +381,21 @@ HRESULT CD3DFont::Initialize(IDirect3DDevice9 *pD3Ddev)
 		x += size.cx + (2 * m_chrSpacing);
 	}
 
-	D3DLOCKED_RECT	d3dlr;
+	D3DLOCKED_RECT d3dlr;
 	m_pD3Dtex->LockRect(0, &d3dlr, 0, 0);
 
 	BYTE *pDstRow = (BYTE *)d3dlr.pBits;
 	WORD *pDst16;
 
-	for (y = 0; y < m_texHeight; y++)
+	for (y = 0; y < m_texHeight; y++) 
 	{
 		pDst16 = (WORD *)pDstRow;
 
-		for (x = 0; x < m_texWidth; x++)
+		for (x = 0; x < m_texWidth; x++) 
 		{
-			DWORD	pixel = pBitmapBits[m_texWidth * y + x];
-			BYTE	bAlpha = 15 - (((BYTE)(pixel >> 8)) >> 4);	// green channel
-			BYTE	bValue = ((BYTE)(pixel >> 16)) >> 4;			// red channel
+			DWORD pixel = pBitmapBits[m_texWidth * y + x];
+			BYTE  bAlpha = 15 - (((BYTE)(pixel >> 8)) >> 4); // green channel
+			BYTE  bValue = ((BYTE)(pixel >> 16)) >> 4;		 // red channel
 			*pDst16 = (WORD)(bAlpha << 12) | (bValue << 8) | (bValue << 4) | (bValue);
 			pDst16++;
 		}
@@ -410,7 +414,7 @@ HRESULT CD3DFont::Initialize(IDirect3DDevice9 *pD3Ddev)
 	return S_OK;
 }
 
-HRESULT CD3DFont::Invalidate()
+HRESULT c_font::invalidate()
 {
 	m_isReady = false;
 
@@ -421,7 +425,7 @@ HRESULT CD3DFont::Invalidate()
 	//SAFE_RELEASE(m_pD3DstateNorm);
 	m_pRender->Invalidate();
 
-	//CD3DBaseRender::Invalidate();
+	//c_base_render::Invalidate();
 	return S_OK;
 }
 
@@ -485,7 +489,7 @@ stColorTag GetColorTag(const char *text, size_t maxLen)
 	return color;
 }
 
-HRESULT CD3DFont::Print(const char *text, D3DCOLOR color, float x, float y, bool skipColorTags, bool noColorFormat)
+HRESULT c_font::print(const char *text, D3DCOLOR color, float x, float y, bool skipColorTags, bool noColorFormat)
 {
 	if (!m_isReady || text == nullptr || *text == '\0')
 		return E_FAIL;
@@ -494,7 +498,7 @@ HRESULT CD3DFont::Print(const char *text, D3DCOLOR color, float x, float y, bool
 	D3DCOLOR clr = color;
 	xp = x -= (float)m_chrSpacing;
 
-	if (FAILED(this->BeginRender()))
+	if (FAILED(this->begin_render()))
 		return E_FAIL;
 
 	DWORD fvf;
@@ -509,7 +513,7 @@ HRESULT CD3DFont::Print(const char *text, D3DCOLOR color, float x, float y, bool
 	if (FAILED(m_pD3Dbuf->Lock(0, 0, (void **)&pVertex, D3DLOCK_DISCARD)))
 	{
 		m_pD3Ddev->SetFVF(fvf);
-		this->EndRender();
+		this->end_render();
 		return E_FAIL;
 	}
 
@@ -519,7 +523,7 @@ HRESULT CD3DFont::Print(const char *text, D3DCOLOR color, float x, float y, bool
 		if (text[cpos] == '\n')
 		{
 			xp = x;
-			yp += DrawHeight();
+			yp += draw_height();
 			continue;
 		}
 		int c = (byte)(text[cpos]) - 32;
@@ -569,18 +573,18 @@ HRESULT CD3DFont::Print(const char *text, D3DCOLOR color, float x, float y, bool
 		m_pD3Ddev->DrawPrimitive(D3DPT_TRIANGLELIST, 0, usedTriangles);
 	}
 	m_pD3Ddev->SetFVF(fvf);
-	this->EndRender();
+	this->end_render();
 
 	return S_OK;
 }
 
-HRESULT CD3DFont::PrintShadow(float x, float y, DWORD color, const char *szText)
+HRESULT c_font::print_shadow(float x, float y, DWORD color, const char *szText)
 {
-	Print(szText, D3DCOLOR_ARGB(128, 0, 0, 0), x + 1.0f, y + 1.0f, true, false);
-	return Print(szText, color, x, y, false, false);
+	print(szText, D3DCOLOR_ARGB(128, 0, 0, 0), x + 1.0f, y + 1.0f, true, false);
+	return print(szText, color, x, y, false, false);
 }
 
-float CD3DFont::DrawLength(const char *szText, bool noColorFormat) const
+float c_font::draw_length(const char *szText, bool noColorFormat) const
 {
 	float	len = 0.0f;
 	float	sub = (m_dwCreateFlags & FCR_BORDER) ? 2.0f : 0.0f;
@@ -607,7 +611,7 @@ float CD3DFont::DrawLength(const char *szText, bool noColorFormat) const
 	return len;
 }
 
-size_t CD3DFont::GetCharPos(const char *text, float x, bool noColorFormat) const
+size_t c_font::get_char_pos(const char *text, float x, bool noColorFormat) const
 {
 	size_t pos = 0;
 	float	len = 0.0f;
@@ -636,7 +640,7 @@ size_t CD3DFont::GetCharPos(const char *text, float x, bool noColorFormat) const
 	return pos;
 }
 
-CD3DRender::CD3DRender(int numVertices)
+c_render::c_render(int numVertices)
 {
 	m_canRender = false;
 
@@ -652,16 +656,16 @@ CD3DRender::CD3DRender(int numVertices)
 	m_curVertex = 0;
 }
 
-CD3DRender::~CD3DRender()
+c_render::~c_render()
 {
 	Invalidate();
 }
 
-HRESULT CD3DRender::Initialize(IDirect3DDevice9 *pD3Ddev)
+HRESULT c_render::Initialize(IDirect3DDevice9 *pD3Ddev)
 {
 	if (!m_canRender)
 	{
-		if (FAILED(CD3DBaseRender::Initialize(pD3Ddev)))
+		if (FAILED(c_base_render::Initialize(pD3Ddev)))
 			return E_FAIL;
 		if (FAILED(m_pD3Ddev->CreateVertexBuffer(m_maxVertex * sizeof(d3dvertex_s),
 			D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, 0, D3DPOOL_DEFAULT, &m_pD3Dbuf, NULL)))
@@ -673,7 +677,7 @@ HRESULT CD3DRender::Initialize(IDirect3DDevice9 *pD3Ddev)
 	return S_OK;
 }
 
-HRESULT CD3DRender::Invalidate()
+HRESULT c_render::Invalidate()
 {
 	SAFE_RELEASE(m_pD3Dbuf);
 	SAFE_RELEASE(m_texture);
@@ -681,13 +685,13 @@ HRESULT CD3DRender::Invalidate()
 
 	//SAFE_RELEASE(m_pD3DstateDraw);
 	//SAFE_RELEASE(m_pD3DstateNorm);
-	CD3DBaseRender::Invalidate();
+	c_base_render::Invalidate();
 	m_canRender = false;
 
 	return S_OK;
 }
 
-HRESULT CD3DRender::Begin(D3DPRIMITIVETYPE primType)
+HRESULT c_render::Begin(D3DPRIMITIVETYPE primType)
 {
 	if (!m_canRender)
 		return E_FAIL;
@@ -703,7 +707,7 @@ HRESULT CD3DRender::Begin(D3DPRIMITIVETYPE primType)
 	return S_OK;
 }
 
-HRESULT CD3DRender::End()
+HRESULT c_render::End()
 {
 	int numPrims;
 
@@ -715,7 +719,7 @@ HRESULT CD3DRender::End()
 		return E_FAIL;
 	}
 
-	if (FAILED(CD3DBaseRender::BeginRender()))
+	if (FAILED(c_base_render::begin_render()))
 		return E_FAIL;
 
 	switch (m_primType)
@@ -773,118 +777,100 @@ HRESULT CD3DRender::End()
 		m_pD3Ddev->SetFVF(fvf);
 	}
 
-	CD3DBaseRender::EndRender();
+	c_base_render::end_render();
 
 	return S_OK;
 }
 
-HRESULT CD3DRender::D3DColor(DWORD color)
+HRESULT c_render::D3DColor(DWORD color)
 {
 	m_color = color;
 	return m_canRender ? S_OK : E_FAIL;
 	return S_OK;
 }
 
-void CD3DRender::D3DBindTexture(IDirect3DTexture9 *texture)
+void c_render::D3DBindTexture(IDirect3DTexture9 *texture)
 {
 	m_texture = texture;
 }
 
-void CD3DRender::D3DTexCoord2f(float u, float v)
+void c_render::D3DTexCoord2f(float u, float v)
 {
 	m_tu = u;
 	m_tv = v;
 }
 
-HRESULT CD3DRender::D3DVertex2f(float x, float y)
+HRESULT c_render::D3DVertex2f(s_vector2 pos)
 {
 	if (m_canRender && m_pVertex && ++m_curVertex < m_maxVertex)
-		*m_pVertex++ = Init2DVertex(x, y, m_color, m_tu, m_tv);
+		*m_pVertex++ = Init2DVertex(pos.x, pos.y, m_color, m_tu, m_tv);
 	else
 		return E_FAIL;
 
 	return S_OK;
 }
 
-void CD3DRender::D3DTexQuad(float sx, float sy, float ex, float ey, float su, float sv, float eu, float ev)
-{
-	if (SUCCEEDED(Begin(D3DPT_TRIANGLELIST)))
-	{
-		D3DColor(D3DCOLOR_XRGB(255, 255, 255));
-		D3DTexCoord2f(su, sv);
-		D3DVertex2f(sx, sy);
-		D3DTexCoord2f(eu, sv);
-		D3DVertex2f(ex, sy);
-		D3DTexCoord2f(su, ev);
-		D3DVertex2f(sx, ey);
-
-		D3DTexCoord2f(su, ev);
-		D3DVertex2f(sx, ey);
-		D3DTexCoord2f(eu, sv);
-		D3DVertex2f(ex, sy);
-		D3DTexCoord2f(eu, ev);
-		D3DVertex2f(ex, ey);
-		End();
-	}
-}
-
-void CD3DRender::D3DBox(float x, float y, float w, float h, D3DCOLOR color)
+void c_render::D3DTexQuad(s_vector2 shit, s_vector2 size, 
+	std::uint32_t color, float su, float sv, float eu, float ev)
 {
 	if (SUCCEEDED(Begin(D3DPT_TRIANGLELIST)))
 	{
 		D3DColor(color);
-		D3DVertex2f(x, y);
-		D3DVertex2f(x + w, y);
-		D3DVertex2f(x, y + h);
-		D3DVertex2f(x, y + h);
-		D3DVertex2f(x + w, y);
-		D3DVertex2f(x + w, y + h);
+		D3DTexCoord2f(su, sv);
+		D3DVertex2f(shit);
+		D3DTexCoord2f(eu, sv);
+		D3DVertex2f({size.x, shit.y});
+		D3DTexCoord2f(su, ev);
+		D3DVertex2f({shit.x, size.y});
+
+		D3DTexCoord2f(su, ev);
+		D3DVertex2f({shit.x, size.y});
+		D3DTexCoord2f(eu, sv);
+		D3DVertex2f({size.x, shit.y});
+		D3DTexCoord2f(eu, ev);
+		D3DVertex2f(size);
 		End();
 	}
 }
 
-void CD3DRender::D3DBoxi(int x, int y, int w, int h, D3DCOLOR color, int maxW)
+void c_render::D3DBox(s_vector2 pos, s_vector2 size, std::uint32_t color)
 {
-	if (maxW)
+	if (SUCCEEDED(Begin(D3DPT_TRIANGLELIST)))
 	{
-		if (w >= maxW)
-			(w = maxW);
-		D3DBox((float)x, (float)y, (float)w, (float)h, color);
+		D3DColor(color);
+		D3DVertex2f(pos);
+		D3DVertex2f({pos.x + size.x, pos.y});
+		D3DVertex2f({pos.x, pos.y + size.y});
+		D3DVertex2f({pos.x, pos.y + size.y});
+		D3DVertex2f({pos.x + size.x, pos.y});
+		D3DVertex2f(pos + size);
+		End();
 	}
-	else
-	{
-		D3DBox((float)x, (float)y, (float)w, (float)h, color);
-	}
 }
 
-void CD3DRender::D3DBoxBorder(float x, float y, float w, float h, D3DCOLOR border_color, D3DCOLOR color)
+void c_render::border_box(s_vector2 pos, s_vector2 size, std::uint32_t border_color, std::uint32_t color)
 {
-	D3DBox(x, y, w - 1.0f, 1.0f, border_color);
-	D3DBox(x + w - 1.0f, y, 1.0f, h - 1.0f, border_color);
-	D3DBox(x + 1.0f, y + h - 1.0f, w - 1.0f, 1.0f, border_color);
-	D3DBox(x, y + 1.0f, 1.0f, h - 1.0f, border_color);
-	D3DBox(x + 1.0f, y + 1.0f, w - 2.0f, h - 2.0f, color);
+	D3DBox(pos, {size.x - 1.0f, 1.0f}, border_color);
+	D3DBox({pos.x + size.x - 1.0f, pos.y}, {1.0f, size.y - 1.0f}, border_color);
+	D3DBox({pos.x + 1.0f, pos.y + size.y - 1.0f}, {size.x - 1.0f, 1.0f}, border_color);
+	D3DBox({pos.x, pos.y + 1.0f}, {1.0f, size.y - 1.0f}, border_color);
+	D3DBox(pos + 1.0f, size - 2.0f, color);
 }
 
-void CD3DRender::D3DBoxBorderi(int x, int y, int w, int h, D3DCOLOR border_color, D3DCOLOR color)
-{
-	D3DBoxBorder((float)x, (float)y, (float)w, (float)h, border_color, color);
-}
-
-void CD3DRender::D3DLine(float x, float y, float x2, float y2, D3DCOLOR color)
+void c_render::D3DLine(s_vector2 begin, s_vector2 end, D3DCOLOR color)
 {
 	if (SUCCEEDED(Begin(D3DPT_LINELIST)))
 	{
 		D3DColor(color);
-		D3DVertex2f(x, y);
-		D3DVertex2f(x2, y2);
+		D3DVertex2f(begin);
+		D3DVertex2f(end);
 		End();
 	}
 }
 
-bool CD3DRender::DrawLine(const D3DXVECTOR3 &a, const D3DXVECTOR3 &b, DWORD dwColor)
+bool c_render::DrawLine(const D3DXVECTOR3 &a, const D3DXVECTOR3 &b, DWORD dwColor)
 {
-	if (FAILED(CD3DBaseRender::BeginRender()))
+	if (FAILED(c_base_render::begin_render()))
 		return false;
 
 	////////////////////////////////////////////////////
@@ -942,7 +928,7 @@ bool CD3DRender::DrawLine(const D3DXVECTOR3 &a, const D3DXVECTOR3 &b, DWORD dwCo
 	// restore FVF
 	m_pD3Ddev->SetFVF(fvf);
 
-	CD3DBaseRender::EndRender();
+	c_base_render::end_render();
 
 	return true;
 }

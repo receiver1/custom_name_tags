@@ -1,8 +1,8 @@
 
 #include "hooks.h"
 
-CD3DRender *g_render {new CD3DRender {128}};
-CD3DFont *g_font {nullptr};
+c_render *g_render {new c_render {128}};
+c_font *g_font {nullptr};
 
 bool is_render_ready {false};
 bool is_timer_initializated {false};
@@ -13,7 +13,7 @@ HRESULT __stdcall hook::device_reset(IDirect3DDevice9 *device, D3DPRESENT_PARAME
 {
     if (is_render_ready)
     {
-        g_font->Invalidate();
+        g_font->invalidate();
         g_render->Invalidate();
 
         is_render_ready = false;
@@ -27,32 +27,32 @@ HRESULT __stdcall hook::device_present(IDirect3DDevice9 *device,
     if (!is_render_ready)
     {
         g_render->Initialize(device);
-        g_font->Initialize(device);
+        g_font->initialize(device);
 
         is_render_ready = true;
     }
-    else if (SUCCEEDED(g_render->BeginRender()))
+    else if (SUCCEEDED(g_render->begin_render()))
     {
         if (g_options.enable && !g_game.is_on_pause())
-         {
-             s_server_settings *server_settings = g_samp.get_info()->settings;
-             if (server_settings->show_name_tags)
-             {
-                 const auto p_players {g_samp.get_info()->pools->players};
-                 const std::uint32_t max_playerid = p_players->max_playerid;
-                 for (std::uint32_t i {0}; i <= max_playerid; ++i)
-                 {
-                     c_name_tags tag {i, g_render, g_font};
-                     if (tag.is_valid(server_settings->name_tags_distance))
-                     {
-                         tag.draw_label();
-                         tag.draw_bars();
-                     }
+        {
+            s_server_settings *server_settings = g_samp.get_info()->settings;
+            if (server_settings->show_name_tags)
+            {
+                const auto p_players {g_samp.get_info()->pools->players};
+                const std::uint32_t max_playerid = p_players->max_playerid;
+                for (std::uint32_t i {0}; i <= max_playerid; ++i)
+                {
+                    c_name_tags tag {i, g_render, g_font};
+                    if (tag.is_valid(server_settings->name_tags_distance))
+                    {
+                        tag.draw_label();
+                        tag.draw_bars();
+                    }
                 }
-             }
-         }
+            }
+        }
 
-        g_render->EndRender();
+        g_render->end_render();
     }
     return original::device_present(device, src_rect, dst_rect, window, dirty_region);
 }
@@ -90,7 +90,7 @@ void hook::timer_update()
             IDirect3DDevice9 *device {*reinterpret_cast<IDirect3DDevice9 **>(0xC97C28U)};
             if (device != nullptr)
             {
-                g_font = new CD3DFont {g_options.font_face.c_str(), g_options.font_size, g_options.font_flags};
+                g_font = new c_font {g_options.font_face.c_str(), g_options.font_size, g_options.font_flags};
 
                 void **device_table {*reinterpret_cast<void ***>(device)};
 
@@ -120,7 +120,7 @@ void hook::timer_update()
                         g_font->set_font_name(g_options.font_face.c_str());
                         g_font->set_font_height(g_options.font_size);
                         g_font->set_font_flags(g_options.font_flags);
-                        g_font->Invalidate();
+                        g_font->invalidate();
                         is_render_ready = false;
                     }
                 });

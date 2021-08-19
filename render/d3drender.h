@@ -28,8 +28,10 @@
 #include <cmath>
 #include <string>
 
-class	CD3DFont;
-class	CD3DRender;
+#include "../sdk/vector.hpp"
+
+class	c_font;
+class	c_render;
 
 #define FCR_NONE	(1 << 1)
 #define FCR_BOLD	(1 << 2)
@@ -106,14 +108,14 @@ typedef struct D3DLVERTEX
 	};
 } D3DLVERTEX, *LPD3DLVERTEX;
 
-class CD3DBaseRender
+class c_base_render
 {
 public:
-	CD3DBaseRender();
-	~CD3DBaseRender();
+	c_base_render();
+	~c_base_render();
 
-	static HRESULT	BeginRender();
-	static HRESULT	EndRender();
+	static HRESULT	begin_render();
+	static HRESULT	end_render();
 protected:
 	static HRESULT				Initialize(IDirect3DDevice9 *pD3Ddev);
 	static HRESULT				Invalidate();
@@ -130,29 +132,29 @@ protected:
 	static bool					m_statesOK;
 };
 
-class CD3DFont : public CD3DBaseRender
+class c_font : public c_base_render
 {
 public:
-	CD3DRender *m_pRender;
+	c_render *m_pRender;
 
-	CD3DFont(const char *szFontName, int fontHeight, DWORD dwCreateFlags);
-	~CD3DFont();
+	c_font(const char *szFontName, int fontHeight, DWORD dwCreateFlags);
+	~c_font();
 
-	HRESULT		Initialize(IDirect3DDevice9 *pD3Ddev);
-	HRESULT		Invalidate();
+	HRESULT		initialize(IDirect3DDevice9 *pD3Ddev);
+	HRESULT		invalidate();
 
-	HRESULT		Print(const char *text, D3DCOLOR color, float x, float y, bool skipColorTags, bool noColorFormat);
-	HRESULT		PrintShadow(float x, float y, DWORD color, const char *szText);
+	HRESULT		print(const char *text, D3DCOLOR color, float x, float y, bool skipColorTags, bool noColorFormat);
+	HRESULT		print_shadow(float x, float y, DWORD color, const char *szText);
 
-	float		DrawLength(const char *szText, bool noColorFormat = false) const;
-	size_t		GetCharPos(const char *text, float x, bool noColorFormat = false) const;
+	float		draw_length(const char *szText, bool noColorFormat = false) const;
+	size_t		get_char_pos(const char *text, float x, bool noColorFormat = false) const;
 
-	float DrawHeight() const
-	{
+	float draw_height() const {
 		return m_fChrHeight;
 	};
 
-	void set_font_name(const char *name) {
+	void set_font_name(const char *name) 
+	{
 		strcpy_s(m_szFontName, name);
 		m_isReady = false;
 	}
@@ -186,11 +188,11 @@ private:
 	float					m_fChrHeight;
 };
 
-class CD3DRender : public CD3DBaseRender
+class c_render : public c_base_render
 {
 public:
-	CD3DRender(int numVertices);
-	~CD3DRender();
+	c_render(int numVertices);
+	~c_render();
 
 	HRESULT Initialize(IDirect3DDevice9 *pD3Ddev);
 	HRESULT Invalidate();
@@ -201,26 +203,24 @@ public:
 	HRESULT D3DColor(DWORD color);
 	void	D3DBindTexture(IDirect3DTexture9 *);
 	void	D3DTexCoord2f(float u, float v);
-	HRESULT D3DVertex2f(float x, float y);
+	HRESULT D3DVertex2f(s_vector2 pos);
 
-	void	D3DTexQuad(float sx, float sy, float ex, float ey, float su, float sv, float eu, float ev);
-	void	D3DBox(float x, float y, float w, float h, D3DCOLOR color);
-	void	D3DBoxi(int x, int y, int w, int h, D3DCOLOR color, int maxW);
-	void	D3DBoxBorder(float x, float y, float w, float h, D3DCOLOR border_color, D3DCOLOR color);
-	void	D3DBoxBorderi(int x, int y, int w, int h, D3DCOLOR border_color, D3DCOLOR color);
-	void	D3DLine(float x, float y, float x2, float y2, D3DCOLOR color);
+	void	D3DTexQuad(s_vector2 shit, s_vector2 size, std::uint32_t color = -1, float su = 0.0f, float sv = 0.0f, float eu = 1.0f, float ev = 1.0f);
+	void	D3DBox(s_vector2 pos, s_vector2 size, std::uint32_t color);
+	void	border_box(s_vector2 pos, s_vector2 size, std::uint32_t border_color, std::uint32_t color);
+	void	D3DLine(s_vector2 begin, s_vector2 end, D3DCOLOR color);
 	bool	DrawLine(const D3DXVECTOR3 &a, const D3DXVECTOR3 &b, DWORD dwColor);
 private:
 	D3DPRIMITIVETYPE		m_primType;
 	IDirect3DVertexBuffer9 *m_pD3Dbuf;
 	d3dvertex_s *m_pVertex;
 
-	DWORD					m_color;
-	float					m_tu, m_tv;
+	DWORD m_color;
+	float m_tu, m_tv;
 	IDirect3DTexture9 *m_texture;
-	int						m_maxVertex;
-	int						m_curVertex;
+	int	m_maxVertex;
+	int	m_curVertex;
 
-	bool					m_canRender;
+	bool m_canRender;
 };
 #endif

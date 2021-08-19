@@ -22,12 +22,12 @@ class c_name_tags
     s_remote_player *remote {nullptr};
     s_samp_ped *samp_ped {nullptr};
     s_vector2 screen_position {0.0f, 0.0f};
-    CD3DRender *g_render {nullptr};
-    CD3DFont *g_font {nullptr};
+    c_render *g_render {nullptr};
+    c_font *g_font {nullptr};
     float text_height {0.0f};
     std::uint32_t color {0xFFFFFFFF};
 public:
-    c_name_tags(std::uint32_t playerid, CD3DRender *render, CD3DFont *font);
+    c_name_tags(std::uint32_t playerid, c_render *render, c_font *font);
 
    // void draw_chat_bubble(std::map<std::uint16_t, c_chat_bubble *> &chat_bubbles);
     void draw_bars();

@@ -2,8 +2,21 @@
 
 #include <cmath>
 
-struct s_vector2 {
+struct s_vector2 
+{
 	float x, y;
+
+	s_vector2 operator+(s_vector2 right) {
+		return {this->x + right.x, this->y + right.y};
+	}
+
+	s_vector2 operator+(float right) {
+		return {this->x + right, this->y + right};
+	}
+
+	s_vector2 operator-(float right) {
+		return {this->x - right, this->y - right};
+	}
 };
 
 struct s_vector3
